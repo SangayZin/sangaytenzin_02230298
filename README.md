@@ -1,4 +1,6 @@
-# CI/CD To-do Application Report
+# DSO101 Assigment
+
+**Github repo link** : https://github.com/SangayZin/sangaytenzin_02230298
 
 **Course:** DSO101 – Continuous Integration and Continuous Deployment
 
