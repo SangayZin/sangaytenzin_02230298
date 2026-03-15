@@ -238,9 +238,9 @@ Then the images were pushed:
 docker push sangay298/be-todo:02190108
 docker push sangay298/fe-todo:02190108
 ```
-![alt text](image10.png)
+![alt text](asset/image10.png)
 
-![alt text](image-1.png)
+![alt text](asset/image-1.png)
 
 
 Images can be downloaded and deployed from Docker Hub.
@@ -263,9 +263,9 @@ PORT=5000
 
 After deployment, Render provided a **backend URL**.
 
-![alt text](image-2.png)
-![alt text](image-3.png)
-![alt text](image-4.png)
+![alt text](asset/image-2.png)
+![alt text](asset/image-3.png)
+![alt text](asset/image-4.png)
 ---
 
 ### Frontend Deployment
@@ -279,14 +279,14 @@ REACT_APP_API_URL=https://be-todo-02230298-4.onrender.com
 ```
 
 This connects the frontend to the deployed backend service.
-![alt text](image-5.png)
-![alt text](image-6.png)
-![alt text](image-7.png)
+![alt text](asset/image-5.png)
+![alt text](asset/image-6.png)
+![alt text](asset/image-7.png)
 
 ---
 ## Docker
-![alt text](image-8.png)
-![alt text](image-9.png)
+![alt text](asset/image-8.png)
+![alt text](asset/image-9.png)
 
 
 # 10. Automated CI/CD (Part B)
