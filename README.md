@@ -1,4 +1,4 @@
-# DSO101 Assigment
+# DSO101 Assigment 1
 
 **Github repo link** : https://github.com/SangayZin/sangaytenzin_02230298
 
