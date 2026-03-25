@@ -2,6 +2,7 @@ services:
   - type: web
     name: be-todo
     runtime: docker
+    plan: free   
     dockerfilePath: ./backend/Dockerfile
     envVars:
       - key: PORT
@@ -12,6 +13,7 @@ services:
   - type: web
     name: fe-todo
     runtime: docker
+    plan: free   
     dockerfilePath: ./frontend/Dockerfile
     envVars:
       - key: REACT_APP_API_URL
