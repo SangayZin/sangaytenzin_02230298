@@ -2,14 +2,14 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY ./backend/package*.json ./
 
 RUN npm install
 
 # Create data directory
 RUN mkdir -p /app/data
 
-COPY . .
+COPY ./backend .
 
 EXPOSE 5000
 
