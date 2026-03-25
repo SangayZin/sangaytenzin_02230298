@@ -19,6 +19,6 @@ services:
       - key: REACT_APP_API_URL
         fromService:
           name: be-todo
-          type: service
+          type: web
           property: hostport
     autoDeploy: true
