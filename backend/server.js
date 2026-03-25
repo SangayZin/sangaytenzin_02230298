@@ -9,8 +9,14 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 // Configure CORS explicitly to ensure preflight and cross-origin requests succeed
+const allowedOrigin = process.env.ALLOWED_ORIGIN;
+let originOption = true; // reflect origin by default
+if (allowedOrigin && allowedOrigin !== '*') {
+  originOption = allowedOrigin; // restrict to specific origin
+}
+
 const corsOptions = {
-  origin: true,
+  origin: originOption,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -21,11 +27,16 @@ app.use(cors(corsOptions));
 // Respond to preflight requests for all routes
 app.options('*', cors(corsOptions));
 
-// Add permissive headers as a fallback
+// Add permissive headers as a fallback (uses ALLOWED_ORIGIN if set)
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  if (process.env.ALLOWED_ORIGIN && process.env.ALLOWED_ORIGIN !== '*') {
+    res.header('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN);
+  } else {
+    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  }
   res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
   next();
 });
 app.use(express.json({ limit: '10mb' }));
