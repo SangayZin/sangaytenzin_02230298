@@ -291,98 +291,243 @@ This connects the frontend to the deployed backend service.
 ![alt text](asset/image-9.png)
 
 
-# 10. Automated CI/CD (Part B)
+---
 
-To enable Continuous Deployment, the project was connected to **GitHub**.
+# Part B – Automated Deployment using Render Blueprint
 
-The project was pushed to a GitHub repository.
+## Overview
 
-```bash
-git init
-git add .
-git commit -m "Initial commit"
-git push origin main
+To streamline the deployment process, I implemented a **Render Blueprint** using a `render.yaml` configuration file.
+
+This setup enables Render to:
+
+- Pull the GitHub repository automatically
+- Build Docker images for each service
+- Deploy services on every new commit push
+
+---
+
+## Repository Structure
+
+```
+todo-app
+│
+├── frontend
+│   ├── Dockerfile
+│   └── .env.production
+│
+├── backend
+│   ├── Dockerfile
+│   └── .env.production
+│
+└── render.yaml
 ```
 
-Render was then configured using a **render.yaml file**.
-```
+---
+
+## render.yaml Configuration
+
+The blueprint defines two web services — one for the backend and one for the frontend:
+
+```yaml
 services:
   - type: web
     name: be-todo
     runtime: docker
+    plan: free
     dockerfilePath: ./backend/Dockerfile
     envVars:
       - key: PORT
         value: 5000
-    healthCheckPath: /api/health
     autoDeploy: true
 
   - type: web
     name: fe-todo
     runtime: docker
+    plan: free
     dockerfilePath: ./frontend/Dockerfile
     envVars:
       - key: REACT_APP_API_URL
         fromService:
           name: be-todo
-          property: url
-    depends_on:
-      - be-todo
+          type: web
+          property: hostport
     autoDeploy: true
 ```
 
-This file automatically builds and deploys the frontend and backend services.
+### What Each Field Means
 
-Whenever a new commit is pushed to GitHub:
+| Field | Purpose |
+|--------|---------|
+| `type: web` | Defines the service as a web application |
+| `env: docker` | Instructs Render to use Docker for deployment |
+| `autoDeploy: true` | Automatically redeploys on new Git commits |
+| `dockerfilePath` | Location of the Dockerfile for each service |
+| `envVars` | Runtime environment variables |
 
-1. Render detects the change
+### Important Notes
+
+- **Backend Service (`be-todo`)**  
+  - Runs on port `5000`  
+  - Uses SQLite with temporary storage at `/tmp/todos.db`
+
+- **Frontend Service (`fe-todo`)**  
+  - Runs on port `3000`  
+  - `VITE_API_URL` must point to the backend URL (used during Docker build)
+
+---
+
+## Step-by-Step Deployment Guide
+
+### Step 1: Connect GitHub to Render
+
+1. Log in to your [Render Dashboard](https://dashboard.render.com)
+2. Click **"New +"** and select **Blueprint**
+3. Choose **"Connect a repository"** and authorize GitHub
+4. Select the repository containing code
+
+![alt text](image.png)
+
+### Step 2: Configure the Blueprint
+
+- Render automatically detects the `render.yaml` file
+- Review the detected services and their configurations
+- Update environment variables if needed (e.g., API URLs)
+
+### Step 3: Start Deployment
+
+Click **"Deploy"** — Render will:
+
+- Clone the repository
+- Build Docker images for each service
+- Deploy both frontend and backend services
+
+![alt text](image-2.png)
+![alt text](image-1.png)
+
+### Step 4: Verify Deployment
+
+Once finished, Render provides live URalt textLs:
+
+- Backend: `https://be-todo-xtad.onrender.com`
+- Frontend: `https://fe-todo-pdhe.onrender.com`
+
+Click the frontend URL to access the live app.
+
+---
+
+## Automatic Deployments on Git Push
+
+With `autoDeploy: true`, every code push triggers a fresh deployment.
+
+### Trigger Example
+
+```bash
+git add .
+git commit -m "Update application"
+git push origin main
+```
+
+### What Happens Automatically
+
+1. Render detects the new commit
 2. Docker images are rebuilt
-3. The application is redeployed automatically
-
-This process demonstrates **Continuous Integration and Continuous Deployment**.
-
----
-
-# 11. Testing
-
-The application was tested in several ways.
-
-### Backend API Testing
-
-Using curl commands:
-
-* Fetch all tasks
-* Add new tasks
-* Update tasks
-* Delete tasks
-
-### Frontend Testing
-
-The following actions were tested:
-
-* Adding tasks
-* Editing tasks
-* Completing tasks
-* Deleting tasks
-* Refreshing the page to check persistence
-
-All features worked correctly.
+3. Services are redeployed
+4. The live app is updated — **no manual steps required**
 
 ---
 
-# 12. Conclusion
+## Troubleshooting Common Issues
 
-In this assignment, a full-stack Todo application was successfully developed and deployed using modern DevOps tools.
+### Issue 1: Frontend cannot reach backend
 
-The project demonstrated important concepts such as:
+**Solution**  
+Verify that `VITE_API_URL` in `render.yaml` matches the actual backend URL (e.g., `https://be-todo-xtad.onrender.com`).
 
-* Full-stack web development
-* REST API design
-* Docker containerization
-* Cloud deployment using Render
-* Continuous Integration and Continuous Deployment
+### Issue 2: Build fails with npm errors
 
-Through this project, practical experience was gained in **building, deploying, and maintaining containerized applications in a CI/CD pipeline**.
+**Solution**  
+- Ensure `package.json` dependencies are up to date  
+- Check Node.js version compatibility in Dockerfile  
+- Commit `package-lock.json` to the repository
+
+### Issue 3: Environment variables not loading
+
+**Solution**  
+- Frontend variables must be set **at build time** in `render.yaml`  
+- Backend variables apply at runtime  
+- Restart services manually if changed variables after deployment
 
 ---
+
+## 8. CI/CD Pipeline Overview
+
+This project implements a complete CI/CD pipeline using **GitHub + Render**.
+
+### Workflow Diagram
+
+```
+Developer commits code
+         ↓
+Git push to GitHub
+         ↓
+Render webhook triggered
+         ↓
+Repository cloned
+         ↓
+Docker images built
+         ↓
+Services deployed
+         ↓
+Application updated live
+```
+
+### How It Works
+
+| Component | Role |
+|-----------|------|
+| **GitHub** | Source control & trigger point |
+| **Render Webhook** | Listens for new commits |
+| **Docker** | Builds reproducible images |
+| **render.yaml** | Defines deployment behavior |
+
+### Key Benefits
+
+- **Fully automated** — no manual deployment steps  
+- **Fast updates** — changes go live in minutes  
+- **Consistent** — same process every time  
+- **Immediate feedback** — build failures are visible instantly  
+- **Scalable** — easy to add more services
+
+---
+
+## 9. Challenges Encountered
+
+During this project, I faced and resolved several issues:
+
+| Challenge | Resolution |
+|-----------|-------------|
+| Docker build errors | Debugged Dockerfile syntax and dependency issues |
+| Environment variable mismatch between frontend/backend | Verified and corrected `VITE_API_URL` values |
+| Deployment failures due to incorrect API URLs | Cross-checked URLs from Render dashboard |
+| Frontend not connecting to deployed backend | Ensured build-time variables were correctly passed |
+
+These were fixed by analyzing Docker logs and validating environment configurations.
+
+---
+
+## 10. Conclusion
+
+This assignment provided practical, hands-on experience with modern DevOps tools and deployment workflows.
+
+### Key Skills Gained
+
+- **Containerization** using Docker  
+- **Pushing images** to Docker Hub  
+- **Deploying services** on Render  
+- **Managing environment variables** across services  
+- **Automating builds and deployments** with GitHub + Render  
+
+
+
 
